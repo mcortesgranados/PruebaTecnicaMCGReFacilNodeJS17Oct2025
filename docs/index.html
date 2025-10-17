@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Prueba Técnica Senior Enginner</title>
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #fafbfc; color: #23272f; margin: 0; padding: 0; }
+  .container { max-width: 950px; margin: 40px auto; background: #fff; box-shadow: 0 8px 32px rgba(0,0,0,0.08); border-radius: 10px; padding: 32px 40px; }
+  h1 { color: #1565c0; }
+  h2 { color: #2e7d32; margin-top: 32px; }
+  h3 { color: #7b1fa2; margin-top: 24px; }
+  .note { background: #e3f2fd; border-left: 4px solid #1976d2; padding: 16px 20px; margin: 18px 0; border-radius: 7px; }
+  .note ul { list-style: disc inside; margin: 0; padding-left: 1.2em; }
+  .note li { margin-bottom: 3px; line-height: 1.35; }
+  .note p { margin: 0 0 6px 0; line-height: 1.5; }
+  .footer { text-align: right; color: #888; font-size: 1em; margin-top: 40px; }
+  .tag { background: #e3f2fd; color: #1565c0; border-radius: 4px; padding: 3px 8px; margin-left: 6px; font-size: 0.95em; }
+  dt { color: #2e7d32; font-weight: bold; margin-top: 10px; }
+  dd { margin-bottom: 10px; }
+  .params table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+  .params th, .params td { border: 1px solid #ccc; padding: 6px; }
+  .important { background: #fffde7; border-left: 4px solid #fbc02d; padding: 12px 18px; margin: 18px 0; border-radius: 5px; }
+  .sideEffects ul, .solid ul { margin: 0; padding-left: 20px; }
+  @media (max-width: 600px) { .container { padding: 16px 8px; } }
+  /* Code block styling */
+  pre { background: #f6f8fa; padding: 14px; border-radius: 8px; overflow: auto; font-size: 0.92em; }
+  code { font-family: Consolas, 'Courier New', monospace; }
+  .row { display:flex; gap:20px; flex-wrap:wrap; }
+  .col { flex:1 1 420px; }
+  /* Small visual helpers */
+  .endpoint { border: 1px solid #e0e0e0; padding: 12px 14px; border-radius: 8px; background: #fff; box-shadow: 0 3px 8px rgba(0,0,0,0.04); }
+  .json { white-space: pre; font-family: Consolas, 'Courier New', monospace; font-size: 0.95em; }
+  .success { color: #2e7d32; font-weight: 600; }
+  .error { color: #c62828; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Prueba Técnica Senior Enginner</h1>
+<h2>Ejercicio Práctico</h2>
+<p>1. Contexto del Problema</p>
+<p><br>
+  ITEM-01 Tu equipo trabaja en un ecosistema de microservicios para una 
+  billetera digital. en el cual se realizan movimientos de carga y resta<br>
+  de saldo "procesamiento de transacciones".</p>
+<h2>2. Requerimientos</h2>
+<p><br>
+  <strong>ITEM-02</strong> Crear un microservicio que procese transacciones financieras.</p>
+<p><br>
+  <strong>ITEM-03</strong> Input: Mensaje transacción.<br>
+  </p>
+<p>Cada transacción tiene los siguientes campos:</p>
+<ul>
+<li>transaction_id</li>
+<li>user_id</li>
+<li>amount</li>
+<li>type (deposit o withdraw)</li>
+<li>timestamp</li>
+</ul>
+<p><strong>ITEM-04</strong> Output: Registro de la transacción en una base de datos 
+PostgreSQL o similar (BD Relacional).<br>
+Incluir:</p>
+<ul>
+<li><strong>ITEM-04-01</strong> Validación de datos (e.g., que el amount sea positivo).</li>
+<li><strong>ITEM-04-02</strong> Simulación de operación de negocio (e.g., actualización del 
+balance de un usuario en base a la transacción).</li>
+<li><strong>ITEM-04-03</strong> Registro de logs para seguimiento de errores o<br>
+comportamientos sospechosos.</li>
+</ul>
+<h3>ITEM-05 Implementar:</h3>
+<ul>
+<li><strong>ITEM-05-01</strong> API REST para guardar una transacción, consultar el historial 
+de transacciones por user_id, y consultar el saldo 
+actual por user_id.</li>
+<li><strong>ITEM-05-02</strong> Persistencia en PostgreSQL o similar usando tablas<br>
+normalizadas.</li>
+<li><strong>ITEM-05-03</strong> Configuración de despliegue en Docker preferiblemente para<br>
+Kubernetes (e.g., un Deployment y un Service).</li>
+</ul>
+<h2>ITEM-06 3. Extras (Opcional)</h2>
+<ul>
+<li>ITEM-06-01 Un mecanismo básico de alerta para detectar intentos de 
+fraude (e.g., transacciones consecutivas de alto monto en un<br>
+corto tiempo).</li>
+<li>ITEM-06-02 Pruebas unitarias y de integración.</li>
+</ul>
+<h3>ITEM-07 Preguntas Conceptuales</h3>
+<ol>
+<li>ITEM-07-01 ¿Cómo manejarías picos altos de transacciones para 
+garantizar escalabilidad?</li>
+<li>ITEM-07-02 ¿Qué estrategias usarías para prevenir fraudes en un sistema 
+de billetera digital?</li>
+<li>ITEM-07-03 Si detectas lentitud en el procesamiento de transacciones por 
+alta concurrencia, ¿cómo procederías para mejorar el 
+rendimiento?</li>
+</ol>
+<p>Enviar url del proyecto en GitHub y las respuestas a las 
+preguntas conceptuales dejarlas en el readme.md</p>
+<p>&nbsp;</p>
+<p>Entregables :</p>
+<ul>
+  <li>Estructura de directorios	</li>
+</ul>
+</div>
+</body>
+</html>
