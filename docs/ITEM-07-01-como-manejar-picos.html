@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escalabilidad en Proyecto de Billetera Digital</title>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #fafbfc; color: #23272f; margin: 0; padding: 0; }
+    .container { max-width: 950px; margin: 40px auto; background: #fff; box-shadow: 0 8px 32px rgba(0,0,0,0.08); border-radius: 10px; padding: 32px 40px; }
+    h1 { color: #1565c0; }
+    h2 { color: #2e7d32; margin-top: 32px; }
+    h3 { color: #7b1fa2; margin-top: 24px; }
+    .note { background: #e3f2fd; border-left: 4px solid #1976d2; padding: 16px 20px; margin: 18px 0; border-radius: 7px; }
+    .note ul { list-style: disc inside; margin: 0; padding-left: 1.2em; }
+    .note li { margin-bottom: 3px; line-height: 1.35; }
+    .note p { margin: 0 0 6px 0; line-height: 1.5; }
+    .footer { text-align: right; color: #888; font-size: 1em; margin-top: 40px; }
+    .tag { background: #e3f2fd; color: #1565c0; border-radius: 4px; padding: 3px 8px; margin-left: 6px; font-size: 0.95em; }
+    dt { color: #2e7d32; font-weight: bold; margin-top: 10px; }
+    dd { margin-bottom: 10px; }
+    .params table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+    .params th, .params td { border: 1px solid #ccc; padding: 6px; }
+    .important { background: #fffde7; border-left: 4px solid #fbc02d; padding: 12px 18px; margin: 18px 0; border-radius: 5px; }
+    .sideEffects ul, .solid ul { margin: 0; padding-left: 20px; }
+    @media (max-width: 600px) { .container { padding: 16px 8px; } }
+    pre { background: #f6f8fa; padding: 14px; border-radius: 8px; overflow: auto; font-size: 0.92em; }
+    code { font-family: Consolas, 'Courier New', monospace; }
+    .row { display:flex; gap:20px; flex-wrap:wrap; }
+    .col { flex:1 1 420px; }
+    .endpoint { border: 1px solid #e0e0e0; padding: 12px 14px; border-radius: 8px; background: #fff; box-shadow: 0 3px 8px rgba(0,0,0,0.04); }
+    .json { white-space: pre; font-family: Consolas, 'Courier New', monospace; font-size: 0.95em; }
+    .success { color: #2e7d32; font-weight: 600; }
+    .error { color: #c62828; font-weight: 600; }
+    table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #e3f2fd; color: #1565c0; }
+    ul { margin: 0; padding-left: 18px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💳 Escalabilidad ante Picos Altos de Transacciones</h1>
+    <p>Este documento detalla estrategias técnicas para manejar picos altos de transacciones en tu proyecto de billetera digital, indicando los componentes afectados y qué se debe mejorar o cambiar en cada uno.</p>
+
+    <div class="note">
+      <p>Las mejoras propuestas contemplan:</p>
+      <ul>
+        <li>Optimización de la aplicación y servicios Node.js</li>
+        <li>Optimización de la base de datos PostgreSQL</li>
+        <li>Configuraciones de AWS para escalabilidad y resiliencia</li>
+        <li>Buenas prácticas en frontend para reducir presión sobre el backend</li>
+      </ul>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>🛠 Componente</th>
+          <th>🔧 Qué se debe mejorar / cambiar</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>TransactionService</td>
+          <td>
+            <ul>
+              <li>📦 Desacoplar lógica de recepción y procesamiento usando colas (AWS SQS).</li>
+              <li>⚡ Hacer procesamiento asíncrono para no bloquear el endpoint principal.</li>
+              <li>⏱ Reducir tiempo dentro de transacciones de DB, mover cálculos de balance fuera de BEGIN…COMMIT.</li>
+              <li>🔄 Implementar batching de transacciones para actualizaciones de saldo e inserciones en la tabla transactions.</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td>PostgresRepository</td>
+          <td>
+            <ul>
+              <li>📊 Crear índices compuestos en <code>transactions(user_id, timestamp)</code> y <code>users(user_id)</code> para acelerar consultas.</li>
+              <li>🗂 Considerar particionamiento o sharding de la tabla <code>transactions</code> por rango de fechas o user_id para alta concurrencia.</li>
+              <li>💾 Integrar caching de balances recientes (Redis / ElastiCache) para reducir carga en consultas de getUserBalance().</li>
+              <li>🛠 Optimizar queries SQL, evitar subconsultas innecesarias y usar VACUUM ANALYZE periódicamente.</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td>Node.js Backend / API</td>
+          <td>
+            <ul>
+              <li>🖥 Escalamiento horizontal: permitir múltiples instancias de API (ECS/EC2) detrás de ELB.</li>
+              <li>⚖️ Configurar ELB para distribuir la carga y realizar health checks a cada instancia.</li>
+              <li>🚦 Implementar throttling/rate limiting por usuario para proteger endpoints críticos.</li>
+              <li>🔗 Connection pooling con pg.Pool bien configurado para manejar conexiones concurrentes a Postgres.</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td>AWS Infrastructure</td>
+          <td>
+            <ul>
+              <li>🚀 Auto Scaling Group para instancias EC2/ECS según métricas de CPU, memoria o requests por segundo.</li>
+              <li>💾 Integración de Redis/ElastiCache para caching y reducción de latencia de queries frecuentes.</li>
+              <li>📩 Uso de SQS para desacoplar procesamiento de transacciones y evitar saturación del backend.</li>
+              <li>📊 CloudWatch / Grafana / Prometheus para monitoreo de latencia, throughput y alertas ante picos de tráfico.</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td>Frontend (React)</td>
+          <td>
+            <ul>
+              <li>🌐 Implementar polling o WebSockets para mostrar saldos actualizados sin generar demasiadas consultas simultáneas a la API.</li>
+              <li>💡 Optimizar llamadas a endpoints críticos, usar caching local o state management (Redux / Zustand) para evitar exceso de requests.</li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="footer">
+      Proyecto de billetera digital - Estrategias de Escalabilidad 💳
+    </div>
+  </div>
+</body>
+</html>

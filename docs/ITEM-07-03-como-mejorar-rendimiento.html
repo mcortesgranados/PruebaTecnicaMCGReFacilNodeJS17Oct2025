@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Optimización de Transacciones - Billetera Digital</title>
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #fafbfc; color: #23272f; margin: 0; padding: 0; }
+  .container { max-width: 950px; margin: 40px auto; background: #fff; box-shadow: 0 8px 32px rgba(0,0,0,0.08); border-radius: 10px; padding: 32px 40px; }
+  h1 { color: #1565c0; }
+  h2 { color: #2e7d32; margin-top: 32px; }
+  h3 { color: #7b1fa2; margin-top: 24px; }
+  .note { background: #e3f2fd; border-left: 4px solid #1976d2; padding: 16px 20px; margin: 18px 0; border-radius: 7px; }
+  .note ul { list-style: disc inside; margin: 0; padding-left: 1.2em; }
+  .note li { margin-bottom: 3px; line-height: 1.35; }
+  .note p { margin: 0 0 6px 0; line-height: 1.5; }
+  .footer { text-align: right; color: #888; font-size: 1em; margin-top: 40px; }
+  .tag { background: #e3f2fd; color: #1565c0; border-radius: 4px; padding: 3px 8px; margin-left: 6px; font-size: 0.95em; }
+  dt { color: #2e7d32; font-weight: bold; margin-top: 10px; }
+  dd { margin-bottom: 10px; }
+  .params table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+  .params th, .params td { border: 1px solid #ccc; padding: 6px; }
+  .important { background: #fffde7; border-left: 4px solid #fbc02d; padding: 12px 18px; margin: 18px 0; border-radius: 5px; }
+  .sideEffects ul, .solid ul { margin: 0; padding-left: 20px; }
+  @media (max-width: 600px) { .container { padding: 16px 8px; } }
+  pre { background: #f6f8fa; padding: 14px; border-radius: 8px; overflow: auto; font-size: 0.92em; }
+  code { font-family: Consolas, 'Courier New', monospace; }
+  .row { display:flex; gap:20px; flex-wrap:wrap; }
+  .col { flex:1 1 420px; }
+  .endpoint { border: 1px solid #e0e0e0; padding: 12px 14px; border-radius: 8px; background: #fff; box-shadow: 0 3px 8px rgba(0,0,0,0.04); }
+  .json { white-space: pre; font-family: Consolas, 'Courier New', monospace; font-size: 0.95em; }
+  .success { color: #2e7d32; font-weight: 600; }
+  .error { color: #c62828; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>💳 Optimización de rendimiento ante alta concurrencia</h1>
+  <p>Listado de estrategias técnicas para mejorar el procesamiento de transacciones en tu proyecto de billetera digital, considerando aplicación, base de datos y AWS.</p>
+
+  <div class="params">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>🛡 Estrategia</th>
+          <th>📌 Perspectiva</th>
+          <th>📄 Descripción</th>
+          <th>🔹 Implementación técnica en tu proyecto</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>⚡ Optimización de consultas</td>
+          <td>Base de datos</td>
+          <td>Mejorar índices, evitar joins/subconsultas innecesarias, optimizar agregaciones</td>
+          <td>Crear índices en <code>transactions(user_id, timestamp)</code> y <code>users(user_id)</code>. Revisar <code>getUserBalance()</code> y <code>getUserTransactions()</code>.</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>⏱ Transacciones más cortas</td>
+          <td>Aplicación/DB</td>
+          <td>Reducir tiempo de bloqueo de filas y transacciones largas</td>
+          <td>Revisar <code>saveTransaction</code> para mover cálculos fuera de <code>BEGIN...COMMIT</code>. Operaciones mínimas dentro de la transacción.</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>💾 Caching de balances</td>
+          <td>Aplicación</td>
+          <td>Almacenar saldos recientes en memoria para evitar recalcular histórico completo</td>
+          <td>Integrar Redis; actualizar cache en <code>saveTransaction()</code> tras cada transacción exitosa.</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>📩 Colas asíncronas</td>
+          <td>Aplicación/AWS</td>
+          <td>Desacoplar recepción de transacciones de procesamiento real para mejorar throughput</td>
+          <td>Usar AWS SQS; workers consumen la cola y actualizan DB. TransactionService solo valida y encola.</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>📦 Batching de transacciones</td>
+          <td>Aplicación/DB</td>
+          <td>Agrupar varias operaciones para reducir overhead y commits</td>
+          <td>Agrupar múltiples depósitos/retiros en un solo <code>UPDATE users SET balance=…</code> y <code>INSERT INTO transactions</code> en bloque.</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>🌐 Escalamiento horizontal</td>
+          <td>AWS</td>
+          <td>Aumentar instancias de backend para distribuir la carga</td>
+          <td>Desplegar Node.js API en múltiples EC2 o contenedores ECS detrás de ELB; habilitar health checks.</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>🚀 Autoescalado</td>
+          <td>AWS</td>
+          <td>Ajustar automáticamente número de instancias según métricas de carga</td>
+          <td>Configurar Auto Scaling Group en EC2/ECS basado en CPU, memoria o requests.</td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td>⚖️ Load Balancer</td>
+          <td>AWS</td>
+          <td>Distribuir tráfico entre instancias y evitar saturación de un solo nodo</td>
+          <td>Colocar ELB frente a instancias; configurar health checks y round-robin o least-connections.</td>
+        </tr>
+        <tr>
+          <td>9</td>
+          <td>🖥 Optimización de I/O en Node.js</td>
+          <td>Aplicación</td>
+          <td>Evitar bloqueos en operaciones sincrónicas; usar async/await correctamente</td>
+          <td>Revisar TransactionService y PostgresRepository para usar consultas asíncronas <code>await pool.query()</code>.</td>
+        </tr>
+        <tr>
+          <td>10</td>
+          <td>📊 Monitoreo y alertas</td>
+          <td>Aplicación/AWS</td>
+          <td>Detectar cuellos de botella y latencias altas en tiempo real</td>
+          <td>Integrar CloudWatch, Grafana o Prometheus; monitorear latencia de endpoints /transaction y /balance; alertas si > threshold.</td>
+        </tr>
+        <tr>
+          <td>11</td>
+          <td>🗂 Sharding / particionamiento</td>
+          <td>Base de datos/AWS</td>
+          <td>Distribuir datos en múltiples nodos para mejorar concurrencia</td>
+          <td>Particionar tabla <code>transactions</code> por <code>user_id</code> o rango de fechas; considerar RDS partitioning.</td>
+        </tr>
+        <tr>
+          <td>12</td>
+          <td>⚡ Aurora Serverless / RDS Proxy</td>
+          <td>AWS</td>
+          <td>Escalar base de datos automáticamente y mejorar conexiones concurrentes</td>
+          <td>Migrar DB a Aurora Serverless; RDS Proxy para pooling de conexiones desde Node.js.</td>
+        </tr>
+        <tr>
+          <td>13</td>
+          <td>💨 Redis / ElastiCache</td>
+          <td>AWS/Aplicación</td>
+          <td>Caching de saldos y transacciones frecuentes para reducir carga DB</td>
+          <td>Integrar ElastiCache Redis; actualizar cache en cada operación y cachear <code>getUserBalance()</code>.</td>
+        </tr>
+        <tr>
+          <td>14</td>
+          <td>🔗 API Gateway + Lambda</td>
+          <td>AWS</td>
+          <td>Procesamiento serverless de transacciones para escalar automáticamente</td>
+          <td>Endpoints críticos pueden migrarse a Lambda; API Gateway gestiona throttling y concurrency.</td>
+        </tr>
+<tr>
+  <td>15</td>
+  <td>🛠 Optimización de índices y vacuum en Postgres</td>
+  <td>Base de datos</td>
+  <td>Evitar bloquedos y mantener estadísticas actualizadas para consultas rápidas</td>
+  <td>Ejecutar <code>VACUUM ANALYZE</code> periódicamente y revisar índices en <code>transactions</code> y <code>users</code>.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td>📈 Connection Pooling</td>
+  <td>Aplicación/DB</td>
+  <td>Reutilizar conexiones a la base de datos para reducir overhead de nuevas conexiones</td>
+  <td>Configurar <code>pg.Pool</code> en Node.js con límites máximos y tiempos de espera adecuados.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td>🚦 Circuit Breaker</td>
+  <td>Aplicación/AWS</td>
+  <td>Evitar que fallos en DB o servicios externos saturen toda la aplicación</td>
+  <td>Implementar patrón Circuit Breaker en TransactionService con librerías como <code>opossum</code>.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td>📡 CDN para recursos estáticos</td>
+  <td>AWS</td>
+  <td>Reducir carga en el backend sirviendo frontend, JS y assets desde CDN</td>
+  <td>Deploy de frontend en S3 + CloudFront para distribuir contenido y liberar backend.</td>
+</tr>
+<tr>
+  <td>19</td>
+  <td>🔍 Logging eficiente</td>
+  <td>Aplicación</td>
+  <td>Evitar que logs sin filtrar bloqueen la app en alta concurrencia</td>
+  <td>Usar logs asíncronos y agregadores tipo CloudWatch Logs o ELK Stack.</td>
+</tr>
+<tr>
+  <td>20</td>
+  <td>📊 Monitoreo de métricas y alertas proactivas</td>
+  <td>AWS/Aplicación</td>
+  <td>Detectar cuellos de botella antes de que afecten usuarios</td>
+  <td>Integrar CloudWatch, Grafana o Prometheus para latencia de endpoints, CPU, memoria y throughput; disparar alertas automáticas.</td>
+</tr>
+<tr>
+  <td>21</td>
+  <td>🧪 Pruebas de carga periódicas</td>
+  <td>Aplicación/DB</td>
+  <td>Simular alta concurrencia para detectar cuellos de botella</td>
+  <td>Usar herramientas como Artillery o JMeter para endpoints de transacción y balance.</td>
+</tr>
+<tr>
+  <td>22</td>
+  <td>⚡ Asynchronous Processing</td>
+  <td>Aplicación</td>
+  <td>Procesar tareas pesadas fuera del request principal</td>
+  <td>Usar colas tipo AWS SQS y worker nodes para actualizar balances y enviar notificaciones.</td>
+</tr>
+<tr>
+  <td>23</td>
+  <td>📥 Batching de transacciones</td>
+  <td>Aplicación/DB</td>
+  <td>Agrupar varias operaciones para reducir overhead de inserciones</td>
+  <td>Implementar inserciones batch en Postgres y TransactionService para múltiples transacciones simultáneas.</td>
+</tr>
+<tr>
+  <td>24</td>
+  <td>📦 Microservicios desacoplados</td>
+  <td>Aplicación/AWS</td>
+  <td>Separar componentes para escalar individualmente</td>
+  <td>Dividir servicios: transacciones, balance, notificaciones; desplegar en ECS o EKS con auto-scaling.</td>
+</tr>
+<tr>
+  <td>25</td>
+  <td>🛠 Optimización de consultas SQL</td>
+  <td>DB</td>
+  <td>Evitar full scans y joins costosos</td>
+  <td>Revisar queries de TransactionService, agregar índices compuestos y EXPLAIN ANALYZE para performance.</td>
+</tr>
+<tr>
+  <td>26</td>
+  <td>📌 Caching de consultas frecuentes</td>
+  <td>Aplicación/DB</td>
+  <td>Evitar recalcular saldo o histórico constantemente</td>
+  <td>Usar Redis o Memcached para balance por usuario y últimos N movimientos.</td>
+</tr>
+<tr>
+  <td>27</td>
+  <td>🔗 Connection retry con backoff exponencial</td>
+  <td>Aplicación</td>
+  <td>Evitar fallos por saturación de DB o servicios externos</td>
+  <td>Implementar reintentos en TransactionService y DB client con delay exponencial.</td>
+</tr>
+<tr>
+  <td>28</td>
+  <td>🌐 Load Balancer inteligente</td>
+  <td>AWS</td>
+  <td>Distribuir tráfico a múltiples instancias para alta concurrencia</td>
+  <td>Configurar AWS ELB con health checks y auto-scaling de instancias EC2/ECS.</td>
+</tr>
+<tr>
+  <td>29</td>
+  <td>🖥 Horizontal Scaling</td>
+  <td>AWS/Aplicación</td>
+  <td>Agregar más instancias en vez de solo escalar verticalmente</td>
+  <td>Usar Auto Scaling Groups en AWS y configurar métricas de CPU, memoria y latencia.</td>
+</tr>
+<tr>
+  <td>30</td>
+  <td>📊 Observabilidad completa</td>
+  <td>Aplicación/AWS</td>
+  <td>Monitorear métricas, logs y trazas para detectar lentitud</td>
+  <td>Integrar CloudWatch, X-Ray, Grafana y logs centralizados para toda la stack de transacciones.</td>
+</tr>
+<tr>
+  <td>31</td>
+  <td>🧩 Circuit Breaker avanzado</td>
+  <td>Aplicación/AWS</td>
+  <td>Evitar cascadas de fallos por servicios externos saturados o lentos</td>
+  <td>Implementar circuit breaker con métricas de latencia y errores, usando opossum o Resilience4j; fallback responses para endpoints críticos.</td>
+</tr>
+<tr>
+  <td>32</td>
+  <td>🕹 Prioridad de transacciones</td>
+  <td>Aplicación</td>
+  <td>Procesar primero transacciones críticas o de alto valor</td>
+  <td>Implementar colas con prioridad en SQS o RabbitMQ; workers consumen según prioridad.</td>
+</tr>
+<tr>
+  <td>33</td>
+  <td>📥 Pre-fetch de datos frecuentes</td>
+  <td>Aplicación/DB</td>
+  <td>Reducir latencia precargando datos que se consultan repetidamente</td>
+  <td>Cachear últimos balances y transacciones recientes en Redis; actualizar en background sin bloquear request principal.</td>
+</tr>
+<tr>
+  <td>34</td>
+  <td>📊 Métricas de performance por endpoint</td>
+  <td>Aplicación</td>
+  <td>Identificar cuellos de botella específicos</td>
+  <td>Instrumentar cada endpoint con métricas de tiempo de respuesta, throughput y error rate; enviar a CloudWatch o Prometheus.</td>
+</tr>
+<tr>
+  <td>35</td>
+  <td>⚡ Worker pools</td>
+  <td>Aplicación</td>
+  <td>Procesar transacciones en paralelo evitando saturar un solo hilo</td>
+  <td>Configurar pools de workers asíncronos que consumen SQS o colas internas; balancear carga entre workers.</td>
+</tr>
+<tr>
+  <td>36</td>
+  <td>📦 Micro-batching de notificaciones</td>
+  <td>Aplicación/AWS</td>
+  <td>Reducir overhead enviando notificaciones en lote</td>
+  <td>Acumular notificaciones por usuario y enviar batch vía SNS o Twilio cada X segundos o cantidad de eventos.</td>
+</tr>
+<tr>
+  <td>37</td>
+  <td>🖥 Replica reads en DB</td>
+  <td>DB/AWS</td>
+  <td>Reducir carga del nodo principal para consultas de solo lectura</td>
+  <td>Configurar read replicas en RDS o Aurora; queries de getUserBalance o histórico apuntan a replicas.</td>
+</tr>
+<tr>
+  <td>38</td>
+  <td>🔄 Lazy updates y eventual consistency</td>
+  <td>Aplicación/DB</td>
+  <td>Evitar bloqueos innecesarios en operaciones no críticas</td>
+  <td>Actualizar balances secundarios o reportes de forma asincrónica con colas; aceptar consistencia eventual donde sea tolerable.</td>
+</tr>
+<tr>
+  <td>39</td>
+  <td>📈 Auto-scaling basado en métricas de negocio</td>
+  <td>AWS</td>
+  <td>Ajustar instancias según volumen de transacciones reales</td>
+  <td>Configurar Auto Scaling Groups con métricas custom: # transacciones por minuto, latencia media por endpoint, memoria o CPU.</td>
+</tr>
+<tr>
+  <td>40</td>
+  <td>🧪 Pruebas de resiliencia y chaos testing</td>
+  <td>Aplicación/AWS</td>
+  <td>Probar la resistencia de la aplicación ante fallos de infraestructura o alta carga</td>
+  <td>Usar herramientas tipo Gremlin o Chaos Monkey para simular fallos de instancias, latencia DB y saturación de colas; evaluar recovery y alertas.</td>
+</tr>
+<tr>
+  <td>41</td>
+  <td>🧰 Optimización de garbage collection</td>
+  <td>Aplicación</td>
+  <td>Reducir pausas y latencia en Node.js por recolección de memoria</td>
+  <td>Configurar flags de Node.js (--max-old-space-size, --gc-interval) y monitorear memoria; usar pools de objetos para evitar presión de GC.</td>
+</tr>
+<tr>
+  <td>42</td>
+  <td>🛡 Protección ante spikes de tráfico</td>
+  <td>AWS</td>
+  <td>Evitar colapsos del backend ante picos de usuarios</td>
+  <td>Configurar AWS WAF con rate-based rules, CloudFront y ELB para mitigar picos; combinar con auto-scaling.</td>
+</tr>
+<tr>
+  <td>43</td>
+  <td>🔀 Circuit Breaker distribuido</td>
+  <td>Aplicación/AWS</td>
+  <td>Evitar saturar microservicios externos o dependencias</td>
+  <td>Implementar circuit breaker a nivel de servicio y centralizado; fallback responses o colas locales para retry.</td>
+</tr>
+<tr>
+  <td>44</td>
+  <td>📌 Optimización de JSON y payloads</td>
+  <td>Aplicación</td>
+  <td>Reducir tamaño de requests/responses y parsing overhead</td>
+  <td>Usar compresión gzip, eliminar campos innecesarios, y validar payloads antes de parsear.</td>
+</tr>
+<tr>
+  <td>45</td>
+  <td>🕹 Worker orchestration</td>
+  <td>Aplicación</td>
+  <td>Distribuir tareas pesadas entre múltiples workers de forma eficiente</td>
+  <td>Usar libraries tipo Bull o RabbitMQ con concurrency control; balancear carga entre workers.</td>
+</tr>
+<tr>
+  <td>46</td>
+  <td>💨 Optimización de serialización/deserialización</td>
+  <td>Aplicación/DB</td>
+  <td>Reducir overhead al convertir objetos para DB o colas</td>
+  <td>Usar formatos binarios (Protobuf, MsgPack) para mensajes internos y persistencia de transacciones.</td>
+</tr>
+<tr>
+  <td>47</td>
+  <td>🔍 Query profiling y análisis de hotspots</td>
+  <td>DB</td>
+  <td>Identificar consultas lentas o bloqueos frecuentes</td>
+  <td>Usar EXPLAIN ANALYZE, pg_stat_statements y CloudWatch RDS Performance Insights para optimizar queries críticas.</td>
+</tr>
+<tr>
+  <td>48</td>
+  <td>📦 Offloading de tareas pesadas</td>
+  <td>Aplicación/AWS</td>
+  <td>Migrar cálculos pesados fuera del request principal</td>
+  <td>Procesar cálculos en Lambda, Fargate o ECS workers; actualizar balances en cache/DB al finalizar.</td>
+</tr>
+<tr>
+  <td>49</td>
+  <td>📡 Monitoring de latencia de dependencias externas</td>
+  <td>Aplicación/AWS</td>
+  <td>Detectar endpoints externos lentos que afecten performance</td>
+  <td>Instrumentar llamadas a APIs externas con métricas y timeouts; usar fallback o retries con backoff exponencial.</td>
+</tr>
+<tr>
+  <td>50</td>
+  <td>🖥 Segmentación de carga por región</td>
+  <td>AWS</td>
+  <td>Distribuir tráfico según ubicación geográfica para mejorar latencia</td>
+  <td>Configurar CloudFront, Route 53 y múltiples clusters ECS/EC2 en regiones cercanas a los usuarios.</td>
+</tr>
+<tr>
+  <td>51</td>
+  <td>⚡ Pre-warming de instancias</td>
+  <td>AWS</td>
+  <td>Evitar cold starts en servicios serverless o instancias nuevas</td>
+  <td>Configurar Lambdas provisioned concurrency y warm-up scripts para EC2/ECS antes de picos de tráfico.</td>
+</tr>
+<tr>
+  <td>52</td>
+  <td>📊 Auto-tuning de base de datos</td>
+  <td>DB/AWS</td>
+  <td>Ajustar automáticamente parámetros de conexión y buffers según carga</td>
+  <td>Habilitar RDS Performance Insights y usar parámetros auto-tuning de Aurora para conexiones y cache.</td>
+</tr>
+<tr>
+  <td>53</td>
+  <td>🧩 Segmentación de colas</td>
+  <td>Aplicación/AWS</td>
+  <td>Separar tipos de transacciones para procesarlas de manera independiente</td>
+  <td>Crear múltiples SQS queues según prioridad o tipo de transacción; workers específicos consumen cada cola.</td>
+</tr>
+<tr>
+  <td>54</td>
+  <td>🛠 Optimización de threads y event loop</td>
+  <td>Aplicación</td>
+  <td>Maximizar uso de CPU sin bloquear event loop</td>
+  <td>Usar worker threads en Node.js para operaciones pesadas; mantener event loop libre para requests.</td>
+</tr>
+<tr>
+  <td>55</td>
+  <td>🔗 Pooling de conexiones externas</td>
+  <td>Aplicación/AWS</td>
+  <td>Reducir overhead al comunicarse con servicios externos</td>
+  <td>Configurar pools HTTP/HTTPS y DB clients con límite de conexiones simultáneas y timeouts adecuados.</td>
+</tr>
+<tr>
+  <td>56</td>
+  <td>🧮 Pre-cálculo de agregaciones</td>
+  <td>Aplicación/DB</td>
+  <td>Evitar cálculos repetitivos en tiempo real</td>
+  <td>Calcular sumas de transacciones por usuario cada N minutos y almacenar en Redis o tabla summary.</td>
+</tr>
+<tr>
+  <td>57</td>
+  <td>📦 Compresión de datos en tránsito</td>
+  <td>Aplicación/AWS</td>
+  <td>Reducir latencia y uso de ancho de banda</td>
+  <td>Habilitar gzip/deflate en API Gateway o backend Node.js y asegurar HTTPS para cifrado.</td>
+</tr>
+<tr>
+  <td>58</td>
+  <td>🔍 Monitoring de cuellos de botella</td>
+  <td>Aplicación/AWS</td>
+  <td>Identificar qué componentes ralentizan el procesamiento</td>
+  <td>Integrar CloudWatch, X-Ray y logs detallados de TransactionService, PostgresRepository y workers.</td>
+</tr>
+<tr>
+  <td>59</td>
+  <td>🕹 Control de prioridad de transacciones</td>
+  <td>Aplicación</td>
+  <td>Procesar primero transacciones críticas o urgentes</td>
+  <td>Agregar prioridad en colas SQS o lógica de batch para procesar primero transacciones grandes o VIP.</td>
+</tr>
+<tr>
+  <td>60</td>
+  <td>💨 Optimización de serialización JSON</td>
+  <td>Aplicación</td>
+  <td>Reducir overhead al convertir objetos a JSON para API o cache</td>
+  <td>Usar libraries rápidas tipo fast-json-stringify y eliminar campos innecesarios antes de serializar.</td>
+</tr>
+<tr>
+  <td>61</td>
+  <td>📈 Escalado predictivo</td>
+  <td>AWS</td>
+  <td>Escalar instancias antes de picos de tráfico conocidos</td>
+  <td>Configurar Auto Scaling Groups con schedule-based scaling usando métricas históricas de CloudWatch.</td>
+</tr>
+<tr>
+  <td>62</td>
+  <td>🗂 Indexado parcial / Covering indexes</td>
+  <td>DB</td>
+  <td>Reducir tiempo de lectura solo a columnas necesarias</td>
+  <td>Crear índices covering en transactions(user_id, timestamp, amount) para queries frecuentes.</td>
+</tr>
+<tr>
+  <td>63</td>
+  <td>🧩 Denormalización controlada</td>
+  <td>DB/Aplicación</td>
+  <td>Evitar joins costosos y mejorar velocidad de lectura</td>
+  <td>Agregar columnas agregadas en users o transaction_summary; actualizar vía triggers o jobs batch.</td>
+</tr>
+<tr>
+  <td>64</td>
+  <td>⚡ Event-driven architecture</td>
+  <td>Aplicación/AWS</td>
+  <td>Desacoplar servicios y mejorar throughput</td>
+  <td>Publicar eventos en SNS/SQS; microservicios suscritos procesan de manera independiente.</td>
+</tr>
+<tr>
+  <td>65</td>
+  <td>🖥 Multi-threading / Worker threads</td>
+  <td>Aplicación</td>
+  <td>Procesar transacciones concurrentes sin bloquear event loop</td>
+  <td>Usar Node.js worker threads para cálculos pesados y Redis/DB updates en paralelo.</td>
+</tr>
+<tr>
+  <td>66</td>
+  <td>🔗 Optimización de joins y subqueries</td>
+  <td>DB</td>
+  <td>Reducir tiempo de ejecución de consultas complejas</td>
+  <td>Reescribir queries, usar CTEs y evitar subconsultas anidadas en getUserTransactions.</td>
+</tr>
+<tr>
+  <td>67</td>
+  <td>📦 Prioridad de colas por tipo de transacción</td>
+  <td>Aplicación/AWS</td>
+  <td>Procesar primero transacciones críticas</td>
+  <td>Configurar multiple SQS queues con prioridad o tags; workers procesan según prioridad.</td>
+</tr>
+<tr>
+  <td>68</td>
+  <td>📊 Observabilidad distribuida</td>
+  <td>Aplicación/AWS</td>
+  <td>Monitorizar performance de todos los microservicios</td>
+  <td>Integrar OpenTelemetry + X-Ray + CloudWatch; alertas en latencia y errores por servicio.</td>
+</tr>
+<tr>
+  <td>69</td>
+  <td>💨 Optimización de serialización / deserialización</td>
+  <td>Aplicación</td>
+  <td>Reducir overhead de conversiones JSON en API y cache</td>
+  <td>Usar fast-json-stringify, eliminar campos innecesarios y cachear objetos frecuentes en Redis.</td>
+</tr>
+<tr>
+  <td>70</td>
+  <td>🛡 Circuit Breaker granular</td>
+  <td>Aplicación/AWS</td>
+  <td>Evitar saturar servicios dependientes ante errores</td>
+  <td>Implementar Circuit Breaker en TransactionService, DB y llamadas externas con opossum o similar.</td>
+</tr>
+<tr>
+  <td>71</td>
+  <td>🧪 Pruebas de estrés automatizadas</td>
+  <td>Aplicación/DB</td>
+  <td>Detectar puntos débiles bajo alta concurrencia</td>
+  <td>Scripts periódicos con Artillery o JMeter para simular cientos de requests simultáneos.</td>
+</tr>
+<tr>
+  <td>72</td>
+  <td>📈 Horizontal partitioning / sharding</td>
+  <td>DB/AWS</td>
+  <td>Distribuir datos entre múltiples nodos</td>
+  <td>Partition tables por user_id o fechas; configurar read replicas en Aurora para lectura concurrente.</td>
+</tr>
+<tr>
+  <td>73</td>
+  <td>⚡ Optimización de triggers</td>
+  <td>DB</td>
+  <td>Reducir overhead en triggers frecuentes</td>
+  <td>Revisar triggers en transactions y users; combinar o deshabilitar triggers no críticos.</td>
+</tr>
+<tr>
+  <td>74</td>
+  <td>🖥 Node.js clustering</td>
+  <td>Aplicación</td>
+  <td>Aprovechar múltiples cores en la misma instancia</td>
+  <td>Usar cluster module para levantar múltiples workers Node.js compartiendo puerto y load balancing interno.</td>
+</tr>
+<tr>
+  <td>75</td>
+  <td>🌐 Edge caching</td>
+  <td>AWS</td>
+  <td>Reducir latencia para recursos estáticos y balance de lectura</td>
+  <td>Distribuir contenido y endpoints read-only mediante CloudFront y Lambda@Edge si aplica.</td>
+</tr>
+<tr>
+  <td>76</td>
+  <td>📌 Query optimization hints</td>
+  <td>DB</td>
+  <td>Guiar el optimizador para consultas más rápidas</td>
+  <td>Usar hints en queries complejas, analizar EXPLAIN PLAN y ajustar índices.</td>
+</tr>
+<tr>
+  <td>77</td>
+  <td>🔗 Pooling de conexiones HTTP externas</td>
+  <td>Aplicación</td>
+  <td>Reducir overhead de llamadas a servicios externos</td>
+  <td>Configurar HTTP/HTTPS agent con keep-alive y número máximo de sockets.</td>
+</tr>
+<tr>
+  <td>78</td>
+  <td>🛠 Optimización de jobs batch</td>
+  <td>Aplicación/DB</td>
+  <td>Procesar grandes volúmenes de transacciones en bloques</td>
+  <td>Batch insert/update en Postgres, ejecutar jobs fuera de horas pico y actualizar cache Redis.</td>
+</tr>
+<tr>
+  <td>79</td>
+  <td>📡 Throttling dinámico</td>
+  <td>Aplicación/AWS</td>
+  <td>Controlar número de requests según carga del sistema</td>
+  <td>Configurar rate limiting en API Gateway y middleware en Node.js con lógica dinámica según CPU o memoria.</td>
+</tr>
+<tr>
+  <td>80</td>
+  <td>🧩 Pre-calculation de balances agregados</td>
+  <td>Aplicación/DB</td>
+  <td>Evitar cálculos repetitivos en cada request</td>
+  <td>Actualizar tabla summary o Redis cada vez que se procesa un batch o transacción importante.</td>
+</tr>
+<tr>
+  <td>81</td>
+  <td>💨 Lazy loading de datos no críticos</td>
+  <td>Aplicación</td>
+  <td>Reducir tiempo de respuesta inicial</td>
+  <td>Consultar datos secundarios solo cuando el frontend lo solicita; usar endpoints separados.</td>
+</tr>
+<tr>
+  <td>82</td>
+  <td>📦 Micro-batching en colas</td>
+  <td>Aplicación/AWS</td>
+  <td>Agrupar mensajes de SQS para procesamiento eficiente</td>
+  <td>Workers consumen lotes de N mensajes en vez de uno por vez para reducir overhead y commits DB.</td>
+</tr>
+<tr>
+  <td>83</td>
+  <td>🔍 Monitoring de locks y deadlocks</td>
+  <td>DB</td>
+  <td>Detectar y resolver bloqueos de concurrencia</td>
+  <td>Habilitar pg_stat_activity, deadlock logging y alerts; ajustar índices y transacciones cortas.</td>
+</tr>
+<tr>
+  <td>84</td>
+  <td>⚖️ Balanceo entre replicas de lectura</td>
+  <td>DB/AWS</td>
+  <td>Distribuir consultas de lectura pesada</td>
+  <td>Configurar replicas de lectura en Aurora y enviar queries read-only a replicas; actualizar balance en master.</td>
+</tr>
+<tr>
+  <td>85</td>
+  <td>🛡 Cache de resultados de queries</td>
+  <td>Aplicación/DB</td>
+  <td>Evitar recalcular resultados repetitivos</td>
+  <td>Usar Redis/Memcached para consultas frecuentes como historial reciente de transacciones.</td>
+</tr>
+<tr>
+  <td>86</td>
+  <td>🔗 Optimización de serialization/deserialization</td>
+  <td>Aplicación</td>
+  <td>Reducir tiempo de conversión de objetos grandes</td>
+  <td>Usar fast-json-stringify, eliminar campos innecesarios y cachear objetos recurrentes.</td>
+</tr>
+<tr>
+  <td>87</td>
+  <td>📊 Throttling por usuario y endpoint</td>
+  <td>Aplicación/AWS</td>
+  <td>Evitar saturación por usuarios activos</td>
+  <td>Middleware de rate-limiting en Node.js y API Gateway, diferenciado por endpoint y usuario.</td>
+</tr>
+<tr>
+  <td>88</td>
+  <td>🧪 Pruebas de resiliencia</td>
+  <td>Aplicación/AWS</td>
+  <td>Simular fallos y medir recuperación</td>
+  <td>Chaos Engineering en entorno de staging, simulando caídas de EC2, RDS o colas SQS.</td>
+</tr>
+<tr>
+  <td>89</td>
+  <td>🕹 Ajuste de garbage collection</td>
+  <td>Aplicación</td>
+  <td>Reducir pausas y latencia de Node.js</td>
+  <td>Configurar flags de V8 GC y revisar memoria; optimizar objetos temporales en TransactionService.</td>
+</tr>
+<tr>
+  <td>90</td>
+  <td>⚡ Pre-fetching de datos críticos</td>
+  <td>Aplicación</td>
+  <td>Reducir consultas a DB durante flujo crítico</td>
+  <td>Pre-cargar balances y datos frecuentes en Redis antes de operaciones de alta concurrencia.</td>
+</tr>
+<tr>
+  <td>91</td>
+  <td>📈 Indexación adaptativa</td>
+  <td>DB</td>
+  <td>Optimizar índices según queries más frecuentes</td>
+  <td>Analizar logs de queries, crear o eliminar índices según patrones de acceso.</td>
+</tr>
+<tr>
+  <td>92</td>
+  <td>🧩 Segmentación de datos en caché</td>
+  <td>Aplicación/AWS</td>
+  <td>Reducir invalidación de cache masiva</td>
+  <td>Usar claves segmentadas por user_id o tipo de transacción en Redis para actualizaciones parciales.</td>
+</tr>
+<tr>
+  <td>93</td>
+  <td>🔗 Optimización de ORM</td>
+  <td>Aplicación</td>
+  <td>Reducir overhead de queries generadas automáticamente</td>
+  <td>Usar select específicos, batch insert y consultas parametrizadas en Sequelize/TypeORM/NestJS.</td>
+</tr>
+<tr>
+  <td>94</td>
+  <td>🛡 Optimización de retries</td>
+  <td>Aplicación</td>
+  <td>Evitar retry excesivo que sature servicios</td>
+  <td>Implementar backoff exponencial y circuit breaker para DB y servicios externos.</td>
+</tr>
+<tr>
+  <td>95</td>
+  <td>📦 Serverless batch processing</td>
+  <td>AWS</td>
+  <td>Procesar transacciones en lotes sin mantener instancias permanentes</td>
+  <td>Usar Lambda con SQS batch y Step Functions para flujos de procesamiento complejos.</td>
+</tr>
+<tr>
+  <td>96</td>
+  <td>🔍 Monitoreo de latencia por endpoint</td>
+  <td>Aplicación/AWS</td>
+  <td>Detectar endpoints críticos con alto retraso</td>
+  <td>CloudWatch + X-Ray para medir latencia en /transaction, /balance y workers de batch.</td>
+</tr>
+<tr>
+  <td>97</td>
+  <td>⚖️ Optimización de lock contention</td>
+  <td>DB</td>
+  <td>Evitar bloqueos en tablas concurridas</td>
+  <td>Revisar transacciones, usar SELECT FOR UPDATE solo cuando necesario y particionar tablas.</td>
+</tr>
+<tr>
+  <td>98</td>
+  <td>💨 Stream processing</td>
+  <td>Aplicación/AWS</td>
+  <td>Procesar eventos en tiempo real sin bloquear el sistema</td>
+  <td>Usar Kinesis o Lambda para procesar eventos de transacciones y actualizar balances al vuelo.</td>
+</tr>
+<tr>
+  <td>99</td>
+  <td>🧪 Canary releases</td>
+  <td>Aplicación/AWS</td>
+  <td>Probar nuevas versiones sin afectar todo el tráfico</td>
+  <td>Desplegar nuevas versiones de TransactionService a un pequeño % de usuarios y monitorear rendimiento.</td>
+</tr>
+<tr>
+  <td>100</td>
+  <td>📊 Observabilidad avanzada</td>
+  <td>Aplicación/AWS</td>
+  <td>Detectar problemas complejos en microservicios y DB</td>
+  <td>Integrar métricas, logs y trazas con Grafana + CloudWatch + X-Ray + ELK para trazabilidad completa.</td>
+</tr>
+        
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    Proyecto de billetera digital - Estrategias de optimización 💳
+  </div>
+</div>
+</body>
+</html>

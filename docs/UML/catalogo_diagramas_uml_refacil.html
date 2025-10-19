@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>UML & Diagramas — Lista y Propósitos</title>
+  <style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #fafbfc; color: #23272f; margin: 0; padding: 0; }
+  .container { max-width: 950px; margin: 40px auto; background: #fff; box-shadow: 0 8px 32px rgba(0,0,0,0.08); border-radius: 10px; padding: 32px 40px; }
+  h1 { color: #1565c0; }
+  h2 { color: #2e7d32; margin-top: 32px; }
+  h3 { color: #7b1fa2; margin-top: 24px; }
+  .note { background: #e3f2fd; border-left: 4px solid #1976d2; padding: 16px 20px; margin: 18px 0; border-radius: 7px; }
+  .note ul { list-style: disc inside; margin: 0; padding-left: 1.2em; }
+  .note li { margin-bottom: 3px; line-height: 1.35; }
+  .note p { margin: 0 0 6px 0; line-height: 1.5; }
+  .footer { text-align: right; color: #888; font-size: 1em; margin-top: 40px; }
+  .tag { background: #e3f2fd; color: #1565c0; border-radius: 4px; padding: 3px 8px; margin-left: 6px; font-size: 0.95em; }
+  dt { color: #2e7d32; font-weight: bold; margin-top: 10px; }
+  dd { margin-bottom: 10px; }
+  .params table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+  .params th, .params td { border: 1px solid #ccc; padding: 6px; }
+  .important { background: #fffde7; border-left: 4px solid #fbc02d; padding: 12px 18px; margin: 18px 0; border-radius: 5px; }
+  .sideEffects ul, .solid ul { margin: 0; padding-left: 20px; }
+  @media (max-width: 600px) { .container { padding: 16px 8px; } }
+  /* Code block styling */
+  pre { background: #f6f8fa; padding: 14px; border-radius: 8px; overflow: auto; font-size: 0.92em; }
+  code { font-family: Consolas, 'Courier New', monospace; }
+  .row { display:flex; gap:20px; flex-wrap:wrap; }
+  .col { flex:1 1 420px; }
+  /* Small visual helpers */
+  .endpoint { border: 1px solid #e0e0e0; padding: 12px 14px; border-radius: 8px; background: #fff; box-shadow: 0 3px 8px rgba(0,0,0,0.04); }
+  .json { white-space: pre; font-family: Consolas, 'Courier New', monospace; font-size: 0.95em; }
+  .success { color: #2e7d32; font-weight: 600; }
+  .error { color: #c62828; font-weight: 600; }
+  /* Table styles for diagrams */
+  table.diagram-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+  table.diagram-table th, table.diagram-table td { text-align: left; padding: 10px; border-bottom: 1px solid #eee; }
+  table.diagram-table th { color: #1565c0; font-weight: 700; width: 60px; }
+  .badge { font-size: 0.85em; padding: 4px 8px; border-radius: 999px; background: #f1f8ff; color: #1565c0; border: 1px solid #d8e8ff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Catálogo de Diagramas — UML & Diagramas Relacionados</h1>
+    <p class="note"><strong>Propósito:</strong> Resumen organizado de diagramas estructurales, de comportamiento y de arquitectura, con una breve explicación de cada uno para referencia rápida.</p>
+
+    <h2>🧱 1. Structural Diagrams</h2>
+    <p>Estos diagramas muestran los aspectos estáticos de un sistema — clases, relaciones y arquitectura.</p>
+    <table class="diagram-table">
+      <thead>
+        <tr><th>#</th><th>Diagrama</th><th>Propósito</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td><a href="Structural/01_uml_class_diagram.png" target="_blank"><strong>Class Diagram</strong></a></td>
+        <td>Shows classes, attributes, methods, and relationships (associations, inheritance, dependencies).</td></tr>
+        <tr><td>2</td><td><strong><a href="Structural/02_uml_object_diagram.png" target="_blank">Object Diagram</a></strong></td>
+        <td>Shows a snapshot of instances (objects) at a given moment in time.</td></tr>
+        <tr><td>3</td><td><strong><a href="Structural/03_uml_Component_Diagram.png" target="_blank">Component Diagram</a></strong></td>
+        <td>Depicts the organization and dependencies among software components/modules.</td></tr>
+        <tr><td>4</td><td><strong><a href="Structural/04_uml_Composite_Structure_Diagram.png" target="_blank">Composite Structure Diagram</a></strong></td>
+        <td>Details internal structure of a class or component, including parts and connectors.</td></tr>
+        <tr><td>5</td><td><strong><a href="Structural/05_uml_Package_Diagram.png" target="_blank">Package Diagram</a></strong></td>
+        <td>Groups related elements into packages, showing dependencies among them.</td></tr>
+        <tr><td>6</td><td><strong><a href="Structural/06_uml_Deployment_Diagram.png" target="_blank">Deployment Diagram</a></strong></td>
+        <td>Illustrates physical deployment of software artifacts on hardware nodes.</td></tr>
+        <tr><td>7</td><td><a href="Structural/07_uml_Profile_Diagram.png" target="_blank"><strong>Profile Diagram</strong></a></td>
+        <td>Defines custom UML extensions (stereotypes, tagged values) for domain-specific modeling.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>⚙️ 2. Behavioral Diagrams</h2>
+    <p>Describen el comportamiento dinámico del sistema — interacciones, lógica y procesos.</p>
+    <table class="diagram-table">
+      <thead>
+        <tr><th>#</th><th>Diagrama</th><th>Propósito</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>8</td><td><a href="Behavioral/08_uml_Use_Case_Diagram.png" target="_blank"><strong>Use Case Diagram</strong></a></td>
+        <td>Shows system functionality from a user’s point of view — actors and use cases.</td></tr>
+        <tr><td>9</td><td><a href="Behavioral/09_uml_Activity_Diagram.png" target="_blank"><strong>Activity Diagram</strong></a></td>
+        <td>Models workflows, logic, and control flow among activities.</td></tr>
+        <tr><td>10</td><td><a href="Behavioral/10_uml_State_Machine_Diagram.png" target="_blank"><strong>State Machine Diagram</strong></a></td>
+        <td>Describes object states and transitions triggered by events.</td></tr>
+        <tr><td>11</td><td><a href="Behavioral/11_uml_Sequence_Diagram.png" target="_blank"><strong>Sequence Diagram</strong></a></td>
+        <td>Details how objects interact in time order through messages.</td></tr>
+        <tr><td>12</td><td><a href="Behavioral/12_uml_Communication_Diagram.png" target="_blank"><strong>Communication Diagram</strong></a></td>
+        <td>Focuses on object interactions and relationships (message exchange network).</td></tr>
+        <tr><td>13</td><td><a href="Behavioral/13_uml_Interaction_Overview_Diagram.png" target="_blank"><strong>Interaction Overview Diagram</strong></a></td>
+        <td>Combines activity and interaction diagrams to show complex control flows.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>🧩 3. Architectural & High-Level Design Diagrams</h2>
+    <p>Diagramas extendidos o aplicados al diseño de arquitectura del sistema.</p>
+    <table class="diagram-table">
+      <thead>
+        <tr><th>#</th><th>Diagrama</th><th>Propósito</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>14</td>
+          <td><a href="Architectural Y High-Level Design/14_uml_Subsystem_Diagram.png" target="_blank"><strong>Subsystem Diagram</strong></a></td>
+          <td>Represents logical subsystems and their interfaces (often derived from packages/components).</td></tr>
+        <tr>
+          <td>15</td>
+          <td><a href="Architectural Y High-Level Design/15_uml_Layer_Diagram.png" target="_blank"><strong>Layer Diagram</strong></a></td>
+          <td>Shows layered architecture and allowed dependencies between layers.</td></tr>
+        <tr>
+          <td>16</td>
+          <td><a href="Architectural Y High-Level Design/16_uml_Service_Diagram.png" target="_blank"><strong>Service Diagram</strong></a></td>
+          <td>Models service-oriented architecture (SOA) or microservices interactions.</td></tr>
+        <tr>
+          <td>17</td>
+          <td><a href="Architectural Y High-Level Design/17_uml_Domain_Model_Diagram.png" target="_blank"><strong>Domain Model Diagram</strong></a></td>
+          <td>Conceptual-level class diagram focusing on business entities and relationships.</td></tr>
+        <tr>
+          <td>18</td>
+          <td><a href="Architectural Y High-Level Design/18_uml_Entity_Relationship_ER_Diagram.png" target="_blank"><strong>Entity-Relationship (ER) Diagram</strong></a></td>
+          <td>Though not pure UML, often integrated to represent database design.</td></tr>
+        <tr>
+          <td>19</td>
+          <td><a href="Architectural Y High-Level Design/19_uml_Data_Flow_Diagram_DFD.png" target="_blank"><strong>Data Flow Diagram (DFD)</strong></a></td>
+          <td>Also non-UML but commonly used to complement UML for system process flows.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="important">
+      <strong>Notas importantes:</strong>
+      <ul>
+        <li>Algunos diagramas (ER, DFD) no son UML estrictamente, pero son útiles para complementar la documentación arquitectónica.</li>
+        <li>Usa los diagramas estructurales para diseño estático y los de comportamiento para validar flujos y lógica de negocio.</li>
+      </ul>
+    </div>
+
+    <h3>¿Quieres Plantillas o PlantUML?</h3>
+    <p>Si deseas, puedo generar plantillas HTML o fragmentos PlantUML para cualquiera de estos diagramas (por ejemplo, código PlantUML para un Class Diagram). Solo dime cuáles quieres y los creo aquí mismo.</p>
+
+    <div class="footer">Generado automáticamente • Diagrama rápido</div>
+  </div>
+</body>
+</html>

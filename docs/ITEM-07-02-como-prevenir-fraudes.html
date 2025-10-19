@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Prevención de Fraudes - Billetera Digital</title>
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #fafbfc; color: #23272f; margin: 0; padding: 0; }
+  .container { max-width: 950px; margin: 40px auto; background: #fff; box-shadow: 0 8px 32px rgba(0,0,0,0.08); border-radius: 10px; padding: 32px 40px; }
+  h1 { color: #1565c0; }
+  h2 { color: #2e7d32; margin-top: 32px; }
+  h3 { color: #7b1fa2; margin-top: 24px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+  th { background-color: #e3f2fd; color: #1565c0; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>💳 Estrategias para Prevenir Fraudes</h1>
+  <p>Listado de estrategias aplicables a tu proyecto de billetera digital, indicando qué ya está implementado y qué se puede añadir.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>🛡 Estrategia</th>
+        <th>📄 Descripción</th>
+        <th>🔹 Implementación en tu proyecto</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>✅ Validación de datos estricta</td>
+        <td>Revisar cada transacción, monto y tipo antes de procesarla</td>
+        <td>Ya tienes validación de <code>amount > 0</code> y tipo <code>deposit/withdraw</code> en <code>TransactionService</code></td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>🔑 Autenticación y autorización fuerte</td>
+        <td>Uso de tokens JWT, OAuth2 o MFA para evitar accesos no autorizados</td>
+        <td>Se puede integrar JWT en tus endpoints de transacción y balance</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>⏱ Límites y cuotas</td>
+        <td>Limitar cantidad de transacciones o monto por usuario/día</td>
+        <td>Agregar lógica en <code>TransactionService</code> que verifique histórico antes de aprobar transacción</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>👀 Monitoreo de patrones sospechosos</td>
+        <td>Detectar transacciones inusuales o repetitivas</td>
+        <td>Usar <code>logInfo</code> en todas las transacciones y generar alertas si exceden umbral</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>🌐 Verificación de dispositivos y geolocalización</td>
+        <td>Alertas por accesos desde ubicaciones no habituales</td>
+        <td>Integrar IP tracking y geolocalización en backend</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>📧 Confirmaciones adicionales</td>
+        <td>Solicitar validación de transacción vía email o SMS para transacciones grandes</td>
+        <td>Integrar servicio de notificaciones externas (Twilio, AWS SNS)</td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td>📜 Registros y auditoría</td>
+        <td>Mantener un historial inmutable de todas las transacciones</td>
+        <td>Tabla <code>transactions</code> + triggers o registros de auditoría adicionales</td>
+      </tr>
+      <tr>
+        <td>8</td>
+        <td>💳 Prevención de doble gasto</td>
+        <td>Evitar que una misma transacción se aplique dos veces</td>
+        <td>Control de <code>transaction_id</code> único y chequeo de duplicados antes de insertar</td>
+      </tr>
+      <tr>
+        <td>9</td>
+        <td>🚨 Alertas automáticas</td>
+        <td>Notificar a usuario o administrador cuando se detecte comportamiento sospechoso</td>
+        <td>Usar logs + alertas vía email/SMS o dashboards</td>
+      </tr>
+      <tr>
+        <td>10</td>
+        <td>🔒 Tokenización de datos sensibles</td>
+        <td>Reemplazar datos críticos por tokens únicos</td>
+        <td>Se puede implementar en <code>TransactionService</code> al guardar información sensible</td>
+      </tr>
+      <tr>
+        <td>11</td>
+        <td>📊 Rate limiting / Throttling</td>
+        <td>Limitar solicitudes por usuario para prevenir ataques automáticos</td>
+        <td>Middleware en Express para limitar endpoints</td>
+      </tr>
+      <tr>
+        <td>12</td>
+        <td>🤖 Machine Learning para detección de fraude</td>
+        <td>Analizar patrones de transacciones para identificar comportamientos sospechosos</td>
+        <td>Integrar servicio externo de ML o módulo interno</td>
+      </tr>
+      <tr>
+        <td>13</td>
+        <td>🧬 Confirmaciones biométricas</td>
+        <td>Huella digital, reconocimiento facial o PIN adicional para transacciones grandes</td>
+        <td>Integración futura con dispositivos móviles o autenticación biométrica</td>
+      </tr>
+      <tr>
+        <td>14</td>
+        <td>👥 Segregación de cuentas y roles</td>
+        <td>Separar roles administrativos de usuarios normales</td>
+        <td>Implementar roles en base de datos y middleware de autorización en Express</td>
+      </tr>
+      <tr>
+        <td>15</td>
+        <td>🔐 Transacciones reversibles controladas</td>
+        <td>Proceso de disputa o reversión de transacciones detectadas como fraude</td>
+        <td>Crear endpoint de reversión controlada y auditoría</td>
+      </tr>
+      <tr>
+        <td>16</td>
+        <td>🛑 Bloqueo de cuentas sospechosas</td>
+        <td>Bloquear temporalmente cuentas que presentan comportamiento anómalo</td>
+        <td>Agregar flag <code>isBlocked</code> en tabla <code>users</code> y chequear en <code>TransactionService</code></td>
+      </tr>
+      <tr>
+        <td>17</td>
+        <td>💬 Educación al usuario</td>
+        <td>Informar sobre prácticas de seguridad y fraudes comunes</td>
+        <td>Se puede agregar sección en frontend con consejos y alertas</td>
+      </tr>
+      <tr>
+        <td>18</td>
+        <td>🔄 Reconciliación periódica</td>
+        <td>Verificar que todas las transacciones estén correctamente registradas y conciliadas</td>
+        <td>Agregar procesos batch que revisen saldos vs transacciones</td>
+      </tr>
+    <tr>
+      <td>19</td>
+      <td>📡 Monitoreo en tiempo real</td>
+      <td>Supervisar transacciones en tiempo real para detectar anomalías de inmediato</td>
+      <td>Integrar WebSockets o servicios de streaming para alertas instantáneas en el backend/frontend</td>
+    </tr>
+    <tr>
+      <td>20</td>
+      <td>📝 Firma digital de transacciones</td>
+      <td>Cada transacción es firmada digitalmente para garantizar integridad y autenticidad</td>
+      <td>Implementar firma digital en <code>TransactionService</code> usando librerías de criptografía (e.g., Node.js crypto)</td>
+    </tr>      
+<tr>
+  <td>21</td>
+  <td>🔒 Cifrado de datos en reposo</td>
+  <td>Proteger la información sensible almacenada en la base de datos</td>
+  <td>Configurar cifrado a nivel de DB o cifrar campos sensibles en <code>PostgresRepository</code></td>
+</tr>
+<tr>
+  <td>22</td>
+  <td>🔑 Cifrado de datos en tránsito</td>
+  <td>Proteger los datos durante la transmisión</td>
+  <td>Habilitar HTTPS en <code>localServer.js</code> con certificados SSL/TLS</td>
+</tr>
+<tr>
+  <td>23</td>
+  <td>🧩 Verificación de integridad de transacciones</td>
+  <td>Detectar si una transacción fue modificada después de crearse</td>
+  <td>Usar hash o firma digital en cada registro de <code>transactions</code></td>
+</tr>
+<tr>
+  <td>24</td>
+  <td>📊 Análisis de patrones históricos</td>
+  <td>Identificar comportamientos sospechosos en base a histórico de transacciones</td>
+  <td>Crear jobs periódicos que analicen <code>transactions</code> y generen alertas</td>
+</tr>
+<tr>
+  <td>25</td>
+  <td>⚡ Prevención de ataques DDoS</td>
+  <td>Evitar sobrecarga de tus endpoints de transacciones</td>
+  <td>Agregar limitadores de requests en <code>localServer.js</code> usando middleware tipo <code>express-rate-limit</code></td>
+</tr>
+<tr>
+  <td>26</td>
+  <td>🛡 Control de roles y permisos</td>
+  <td>Limitar accesos solo a usuarios o admins autorizados</td>
+  <td>Implementar middleware JWT en endpoints de transacción y balance</td>
+</tr>
+<tr>
+  <td>27</td>
+  <td>⏱ Registro de tiempo de actividad</td>
+  <td>Registrar cuándo se realizan transacciones y accesos al sistema</td>
+  <td>Agregar timestamp en logs y en <code>transactions</code>, ya está parcialmente en tu DB</td>
+</tr>
+<tr>
+  <td>28</td>
+  <td>📱 Verificación de dispositivo</td>
+  <td>Detectar si el usuario accede desde un nuevo dispositivo</td>
+  <td>Registrar deviceId/IP en <code>TransactionService</code> y generar alertas si es desconocido</td>
+</tr>
+<tr>
+  <td>29</td>
+  <td>🔄 Prevención de reversión no autorizada</td>
+  <td>Evitar que se reviertan transacciones sin validación</td>
+  <td>Agregar lógica de autorización para revertir transacciones y log en <code>TransactionService</code></td>
+</tr>
+<tr>
+  <td>30</td>
+  <td>📈 Monitoreo de saldo mínimo</td>
+  <td>Evitar que el saldo de un usuario sea negativo</td>
+  <td>Ya se valida en <code>TransactionService</code>, reforzar con alertas y logs</td>
+</tr>
+<tr>
+  <td>31</td>
+  <td>🧾 Doble verificación de montos grandes</td>
+  <td>Solicitar confirmación adicional en transacciones superiores a un umbral</td>
+  <td>Agregar validación en <code>TransactionService</code> y enviar alerta vía email/SMS</td>
+</tr>
+<tr>
+  <td>32</td>
+  <td>🔔 Alertas de actividad inusual</td>
+  <td>Notificar al usuario o admin si se detectan transacciones fuera del patrón habitual</td>
+  <td>Usar <code>logInfo</code> y enviar notificaciones externas (Twilio, AWS SNS)</td>
+</tr>
+<tr>
+  <td>33</td>
+  <td>🕵️‍♂️ Monitoreo de IPs sospechosas</td>
+  <td>Bloquear o revisar accesos desde IPs maliciosas o listas negras</td>
+  <td>Registrar IP en <code>TransactionService</code> y comparar con blacklist</td>
+</tr>
+<tr>
+  <td>34</td>
+  <td>🔄 Validación de consistencia de balance</td>
+  <td>Verificar que el saldo siempre refleje correctamente todas las transacciones</td>
+  <td>Revisar saldo en <code>getUserBalance</code> y generar alertas si hay inconsistencias</td>
+</tr>
+<tr>
+  <td>35</td>
+  <td>📝 Auditoría externa periódica</td>
+  <td>Revisiones externas de las transacciones y balances</td>
+  <td>Exportar logs o DB para auditoría externa; se puede automatizar con scripts</td>
+</tr>
+<tr>
+  <td>36</td>
+  <td>🛑 Bloqueo automático tras múltiples intentos fallidos</td>
+  <td>Evitar ataques de fuerza bruta</td>
+  <td>Implementar contador de intentos en <code>TransactionService</code> o middleware</td>
+</tr>
+<tr>
+  <td>37</td>
+  <td>📌 Validación de integridad de transacciones</td>
+  <td>Verificar que los registros no sean alterados después de crearse</td>
+  <td>Agregar hash o firma digital en cada transacción en <code>transactions</code></td>
+</tr>
+<tr>
+  <td>38</td>
+  <td>🌐 Control geográfico</td>
+  <td>Restringir transacciones desde países o regiones de alto riesgo</td>
+  <td>Registrar geolocalización en <code>TransactionService</code> y filtrar accesos</td>
+</tr>
+<tr>
+  <td>39</td>
+  <td>📥 Registro de reversos y anulaciones</td>
+  <td>Llevar un historial de todas las anulaciones de transacciones</td>
+  <td>Crear tabla <code>transaction_reversals</code> y registrar allí cada reverso</td>
+</tr>
+<tr>
+  <td>40</td>
+  <td>🧑‍💻 Pruebas de penetración regulares</td>
+  <td>Detectar vulnerabilidades antes de que los atacantes las encuentren</td>
+  <td>Realizar pentesting en endpoints <code>/transaction</code> y <code>/balance</code></td>
+</tr>
+<tr>
+  <td>41</td>
+  <td>🔒 Encriptación de datos sensibles</td>
+  <td>Proteger información de usuarios y transacciones</td>
+  <td>Usar cifrado en la base de datos y HTTPS en el backend</td>
+</tr>
+<tr>
+  <td>42</td>
+  <td>📊 Monitoreo en tiempo real</td>
+  <td>Detectar comportamientos anómalos mientras ocurren</td>
+  <td>Integrar dashboards con alertas desde logs de <code>TransactionService</code></td>
+</tr>
+<tr>
+  <td>43</td>
+  <td>🧩 Pruebas automatizadas de integridad</td>
+  <td>Verificar que las reglas de negocio se cumplan correctamente</td>
+  <td>Agregar tests unitarios e integrados en <code>TransactionService</code></td>
+</tr>
+<tr>
+  <td>44</td>
+  <td>🚫 Protección contra replays</td>
+  <td>Evitar que transacciones repetidas se procesen dos veces</td>
+  <td>Controlar <code>transaction_id</code> único y chequear duplicados antes de insertar</td>
+</tr>
+<tr>
+  <td>45</td>
+  <td>🕶 Supervisión de cuentas compartidas</td>
+  <td>Detectar uso de credenciales compartidas entre múltiples dispositivos</td>
+  <td>Registrar sesiones y alertar si un mismo usuario inicia sesión en varios lugares simultáneamente</td>
+</tr>
+<tr>
+  <td>46</td>
+  <td>📜 Logs inmutables</td>
+  <td>Evitar que registros sean modificados o eliminados</td>
+  <td>Usar tablas append-only o servicios externos de auditoría</td>
+</tr>
+<tr>
+  <td>47</td>
+  <td>🧮 Análisis de comportamiento agregado</td>
+  <td>Identificar patrones sospechosos entre varios usuarios</td>
+  <td>Procesar datos históricos y alertar patrones inusuales con scripts o jobs</td>
+</tr>
+<tr>
+  <td>48</td>
+  <td>🔑 Rotación de claves y credenciales</td>
+  <td>Minimizar riesgos por exposición de secretos</td>
+  <td>Actualizar credenciales de DB y servicios periódicamente</td>
+</tr>
+<tr>
+  <td>49</td>
+  <td>📌 Políticas de contraseñas fuertes</td>
+  <td>Reducir riesgo de acceso no autorizado</td>
+  <td>Integrar validación de contraseñas fuertes en el registro y login</td>
+</tr>
+<tr>
+  <td>50</td>
+  <td>🌟 Incentivos para reportar fraudes</td>
+  <td>Fomentar que usuarios reporten actividades sospechosas</td>
+  <td>Agregar endpoint o formulario para reportes de fraude, vinculado a alertas</td>
+</tr>
+<tr>
+  <td>51</td>
+  <td>🔍 Auditoría periódica de transacciones</td>
+  <td>Revisar operaciones manualmente o mediante scripts automáticos</td>
+  <td>Crear jobs de revisión periódica usando <code>TransactionService</code> y logs</td>
+</tr>
+<tr>
+  <td>52</td>
+  <td>📈 Límites dinámicos por riesgo</td>
+  <td>Ajustar límites de transacciones según historial y comportamiento</td>
+  <td>Agregar lógica en <code>TransactionService</code> para chequear límites por usuario</td>
+</tr>
+<tr>
+  <td>53</td>
+  <td>🧪 Pruebas de penetración regulares</td>
+  <td>Simular ataques para descubrir vulnerabilidades</td>
+  <td>Configurar entornos de pruebas y herramientas de pentesting</td>
+</tr>
+<tr>
+  <td>54</td>
+  <td>💳 Confirmación de métodos de pago</td>
+  <td>Verificar tarjetas o cuentas asociadas antes de procesar</td>
+  <td>Integrar servicios externos para validación de cuentas y tarjetas</td>
+</tr>
+<tr>
+  <td>55</td>
+  <td>🔔 Notificaciones inmediatas al usuario</td>
+  <td>Informar sobre cualquier transacción realizada</td>
+  <td>Usar correo/SMS desde <code>TransactionService</code> tras cada transacción</td>
+</tr>
+<tr>
+  <td>56</td>
+  <td>🛡 Control de IP y geolocalización</td>
+  <td>Detectar accesos desde ubicaciones inusuales</td>
+  <td>Registrar IPs y comparar con historial; alertar si hay anomalías</td>
+</tr>
+<tr>
+  <td>57</td>
+  <td>📝 Confirmación de identidad en cambios críticos</td>
+  <td>Solicitar verificación para cambios de datos sensibles</td>
+  <td>Agregar endpoint de validación adicional antes de actualizar datos</td>
+</tr>
+<tr>
+  <td>58</td>
+  <td>🔄 Reconciliación diaria</td>
+  <td>Verificar consistencia entre transacciones y balances</td>
+  <td>Crear script que corra <code>getUserBalance</code> vs suma de transacciones</td>
+</tr>
+<tr>
+  <td>59</td>
+  <td>🖥 Monitoreo de logs de seguridad</td>
+  <td>Detectar patrones anómalos en logs</td>
+  <td>Centralizar logs con ELK o servicios cloud y generar alertas</td>
+</tr>
+<tr>
+  <td>60</td>
+  <td>🛑 Bloqueo temporal por intentos fallidos</td>
+  <td>Evitar accesos forzados</td>
+  <td>Registrar intentos fallidos en login y bloquear temporalmente</td>
+</tr>
+<tr>
+  <td>61</td>
+  <td>🕵️‍♂️ Análisis forense de incidentes</td>
+  <td>Investigar fraudes detectados</td>
+  <td>Guardar registros de transacciones y eventos para análisis</td>
+</tr>
+<tr>
+  <td>62</td>
+  <td>🔑 Autenticación de múltiples factores (MFA)</td>
+  <td>Reducir riesgo de accesos no autorizados</td>
+  <td>Integrar MFA en login y transacciones críticas</td>
+</tr>
+<tr>
+  <td>63</td>
+  <td>📌 Control de roles y permisos</td>
+  <td>Limitar acciones según tipo de usuario</td>
+  <td>Definir roles y validar en backend antes de ejecutar operaciones</td>
+</tr>
+<tr>
+  <td>64</td>
+  <td>🌐 Seguridad en API externa</td>
+  <td>Evitar que servicios externos comprometan la app</td>
+  <td>Validar y autenticar todas las solicitudes externas con tokens</td>
+</tr>
+<tr>
+  <td>65</td>
+  <td>⚠ Alertas por transacciones grandes</td>
+  <td>Notificar automáticamente ante montos superiores a umbral</td>
+  <td>Agregar lógica en <code>TransactionService</code> para disparar alertas</td>
+</tr>
+<tr>
+  <td>66</td>
+  <td>📆 Historial completo de operaciones</td>
+  <td>Tener trazabilidad total de cada acción</td>
+  <td>Guardar todas las operaciones en tabla <code>transactions</code></td>
+</tr>
+<tr>
+  <td>67</td>
+  <td>🔁 Verificación de transacciones pendientes</td>
+  <td>Confirmar que transacciones críticas fueron procesadas</td>
+  <td>Agregar flag de estado y revisar con script periódico</td>
+</tr>
+<tr>
+  <td>68</td>
+  <td>🧾 Reportes automáticos de actividad</td>
+  <td>Generar alertas y reportes para auditoría</td>
+  <td>Crear endpoint o job que genere CSV o PDF de transacciones</td>
+</tr>
+<tr>
+  <td>69</td>
+  <td>🎯 Prevención de manipulación de parámetros</td>
+  <td>Evitar cambios maliciosos en requests</td>
+  <td>Validar todos los inputs en <code>TransactionService</code> y backend</td>
+</tr>
+<tr>
+  <td>70</td>
+  <td>💾 Backup y recuperación frecuente</td>
+  <td>Evitar pérdida de datos en ataques o fallas</td>
+  <td>Configurar backups automáticos de la DB y test de restauración</td>
+</tr>
+<tr>
+  <td>71</td>
+  <td>🛡 Control de integridad de datos</td>
+  <td>Verificar que los registros no sean alterados después de ser guardados</td>
+  <td>Usar hash o checksum en cada transacción en la tabla <code>transactions</code></td>
+</tr>
+<tr>
+  <td>72</td>
+  <td>🗂 Segmentación de usuarios por riesgo</td>
+  <td>Clasificar usuarios según patrones de comportamiento</td>
+  <td>Agregar columna de riesgo en <code>users</code> y ajustar límites de transacción</td>
+</tr>
+<tr>
+  <td>73</td>
+  <td>📊 Dashboard de actividad sospechosa</td>
+  <td>Visualizar patrones inusuales de transacciones</td>
+  <td>Integrar un dashboard que consuma logs y resuma alertas</td>
+</tr>
+<tr>
+  <td>74</td>
+  <td>⏱ Control de velocidad de transacciones</td>
+  <td>Evitar múltiples transacciones en corto tiempo</td>
+  <td>Implementar throttling en <code>TransactionService</code></td>
+</tr>
+<tr>
+  <td>75</td>
+  <td>📛 Verificación de identidad adicional</td>
+  <td>Solicitar documentos o fotos para transacciones grandes</td>
+  <td>Agregar endpoint de verificación antes de aprobar transacciones críticas</td>
+</tr>
+<tr>
+  <td>76</td>
+  <td>🔐 Encriptación de datos sensibles</td>
+  <td>Proteger información personal y financiera</td>
+  <td>Encriptar campos como <code>userId</code> y <code>amount</code> en DB</td>
+</tr>
+<tr>
+  <td>77</td>
+  <td>🧩 Validación de consistencia de sesión</td>
+  <td>Evitar que se use la misma sesión para múltiples usuarios</td>
+  <td>Agregar check de sesión y token en cada request</td>
+</tr>
+<tr>
+  <td>78</td>
+  <td>🔗 Firma digital de transacciones</td>
+  <td>Verificar autenticidad y evitar manipulación</td>
+  <td>Generar firma en <code>TransactionService</code> y almacenar en DB</td>
+</tr>
+<tr>
+  <td>79</td>
+  <td>🛑 Revisión manual de transacciones críticas</td>
+  <td>Intervención humana en casos sospechosos</td>
+  <td>Generar alerta para revisión antes de procesar transacciones grandes</td>
+</tr>
+<tr>
+  <td>80</td>
+  <td>🌍 Control de origen geográfico</td>
+  <td>Bloquear accesos desde países de riesgo</td>
+  <td>Verificar IP en cada request y bloquear según reglas</td>
+</tr>
+<tr>
+  <td>81</td>
+  <td>📨 Confirmación por email de cambios sensibles</td>
+  <td>Evitar que usuarios maliciosos cambien datos importantes</td>
+  <td>Enviar correo para confirmar actualización de datos personales</td>
+</tr>
+<tr>
+  <td>82</td>
+  <td>📱 Confirmación por SMS de transacciones grandes</td>
+  <td>Agregar doble verificación antes de aprobar transacciones críticas</td>
+  <td>Integrar Twilio o AWS SNS en <code>TransactionService</code></td>
+</tr>
+<tr>
+  <td>83</td>
+  <td>📝 Versionado de transacciones</td>
+  <td>Mantener historial de cambios incluso tras modificaciones</td>
+  <td>Agregar tabla de auditoría que registre cada actualización</td>
+</tr>
+<tr>
+  <td>84</td>
+  <td>🧾 Conciliación bancaria automatizada</td>
+  <td>Comparar transacciones con movimientos reales en banco</td>
+  <td>Integrar servicios de importación de movimientos y reconciliación</td>
+</tr>
+<tr>
+  <td>85</td>
+  <td>🔍 Monitoreo de dispositivos</td>
+  <td>Detectar nuevos dispositivos o cambios sospechosos</td>
+  <td>Registrar device_id en login y alertar si cambia</td>
+</tr>
+<tr>
+  <td>86</td>
+  <td>🛠 Simulación de ataques internos</td>
+  <td>Detectar fallas antes de que ocurran fraudes reales</td>
+  <td>Usar scripts de testing con <code>TransactionService</code></td>
+</tr>
+<tr>
+  <td>87</td>
+  <td>💡 Inteligencia de fraude</td>
+  <td>Usar algoritmos que detecten patrones anómalos</td>
+  <td>Analizar histórico con scripts externos y marcar alertas</td>
+</tr>
+<tr>
+  <td>88</td>
+  <td>📂 Segmentación de transacciones</td>
+  <td>Clasificar según tipo, monto, origen y destino</td>
+  <td>Agregar filtros y dashboards por tipo de transacción</td>
+</tr>
+<tr>
+  <td>89</td>
+  <td>🎛 Control de integridad de API</td>
+  <td>Evitar manipulación de endpoints externos</td>
+  <td>Usar autenticación, validación de headers y tokens en backend</td>
+</tr>
+<tr>
+  <td>90</td>
+  <td>🔒 Monitoreo de intentos de bypass</td>
+  <td>Detectar intentos de saltar validaciones</td>
+  <td>Auditar logs de <code>TransactionService</code> y alertar anomalías</td>
+</tr>
+<tr>
+  <td>91</td>
+  <td>🧾 Registro de intentos fallidos de transacción</td>
+  <td>Guardar cada intento fallido para detectar patrones de fraude</td>
+  <td>Agregar logging en TransactionService para cada intento inválido</td>
+</tr>
+<tr>
+  <td>92</td>
+  <td>🔐 Protección contra inyección SQL</td>
+  <td>Evitar ataques mediante manipulación de queries</td>
+  <td>Usar parámetros preparados en PostgresRepository (ya parcialmente implementado)</td>
+</tr>
+<tr>
+  <td>93</td>
+  <td>🛡 Protección contra Cross-Site Scripting (XSS)</td>
+  <td>Evitar inyecciones de scripts maliciosos</td>
+  <td>Sanitizar inputs en backend y frontend antes de guardar o mostrar</td>
+</tr>
+<tr>
+  <td>94</td>
+  <td>🔑 Reautenticación periódica</td>
+  <td>Solicitar al usuario que se vuelva a autenticar tras cierto tiempo</td>
+  <td>Agregar middleware que valide sesión/token y fuerce re-login</td>
+</tr>
+<tr>
+  <td>95</td>
+  <td>📱 Monitoreo de múltiples dispositivos</td>
+  <td>Detectar si un usuario inicia sesión desde varios dispositivos simultáneamente</td>
+  <td>Registrar deviceId/IP en TransactionService y generar alertas</td>
+</tr>
+<tr>
+  <td>96</td>
+  <td>🕵️‍♂️ Detección de proxies y VPN</td>
+  <td>Evitar acceso desde redes anónimas o de riesgo</td>
+  <td>Analizar IP y bloquear si proviene de VPN o proxy sospechoso</td>
+</tr>
+<tr>
+  <td>97</td>
+  <td>💻 Monitoreo de cambios de configuración</td>
+  <td>Detectar modificaciones no autorizadas en la configuración del sistema</td>
+  <td>Registrar logs de cambios en settings y alertar al admin</td>
+</tr>
+<tr>
+  <td>98</td>
+  <td>📊 Control de patrones de comportamiento</td>
+  <td>Analizar frecuencia, monto y tipo de transacciones para identificar anomalías</td>
+  <td>Scripts periódicos que analicen getUserTransactions y generen alertas</td>
+</tr>
+<tr>
+  <td>99</td>
+  <td>🛡 Prevención de fraude interno</td>
+  <td>Detectar intentos de manipulación por parte de empleados</td>
+  <td>Registrar todas las acciones administrativas y revisar logs regularmente</td>
+</tr>
+<tr>
+  <td>100</td>
+  <td>📌 Limitación de cambios críticos</td>
+  <td>Restringir quién y cómo puede modificar datos sensibles</td>
+  <td>Agregar validaciones en backend y roles en users</td>
+</tr>
+<tr>
+  <td>101</td>
+  <td>🔒 Protección de endpoints sensibles</td>
+  <td>Controlar acceso a endpoints críticos de transacciones y balances</td>
+  <td>Middleware JWT + roles en Express para /transaction y /balance</td>
+</tr>
+<tr>
+  <td>102</td>
+  <td>📝 Registro de sesiones activas</td>
+  <td>Monitorear cuántas sesiones activas tiene un usuario y cuándo</td>
+  <td>Agregar tabla de sessions y registrar login/logout en TransactionService</td>
+</tr>
+<tr>
+  <td>103</td>
+  <td>⚡ Prevención de ataques de fuerza bruta</td>
+  <td>Bloquear intentos repetidos de login o transacciones</td>
+  <td>Agregar contador y bloqueo temporal en login y TransactionService</td>
+</tr>
+<tr>
+  <td>104</td>
+  <td>🛑 Detección de comportamientos repetitivos</td>
+  <td>Evitar que un mismo patrón de transacciones se repita muchas veces</td>
+  <td>Analizar histórico de getUserTransactions y disparar alertas</td>
+</tr>
+<tr>
+  <td>105</td>
+  <td>🔍 Auditoría de cambios críticos</td>
+  <td>Registrar quién modificó qué y cuándo</td>
+  <td>Agregar triggers o middleware que registre cambios en users y transactions</td>
+</tr>
+<tr>
+  <td>106</td>
+  <td>🧾 Backup en tiempo real</td>
+  <td>Minimizar pérdida de información ante incidentes</td>
+  <td>Implementar replicación o backups frecuentes de DB</td>
+</tr>
+<tr>
+  <td>107</td>
+  <td>📦 Control de integridad de archivos externos</td>
+  <td>Verificar que archivos cargados o recibidos no contengan malware</td>
+  <td>Escaneo de archivos con antivirus o librerías de seguridad</td>
+</tr>
+<tr>
+  <td>108</td>
+  <td>🛡 Protección contra manipulaciones de frontend</td>
+  <td>Evitar que usuarios modifiquen parámetros en formularios para fraude</td>
+  <td>Validar todos los inputs en TransactionService antes de procesar</td>
+</tr>
+<tr>
+  <td>109</td>
+  <td>💡 Monitoreo de fraude colaborativo</td>
+  <td>Detectar patrones de fraude coordinados entre usuarios</td>
+  <td>Analizar histórico de transacciones y detectar relaciones sospechosas</td>
+</tr>
+<tr>
+  <td>110</td>
+  <td>🔔 Alertas de cambios críticos en la app</td>
+  <td>Notificar administradores sobre modificaciones sensibles</td>
+  <td>Enviar email/SMS al admin si se modifica saldo, usuarios o roles</td>
+</tr>
+<tr>
+  <td>111</td>
+  <td>🕵️‍♀️ Monitoreo de accesos concurrentes</td>
+  <td>Detectar si un usuario inicia sesión en varios lugares al mismo tiempo</td>
+  <td>Registrar sesiones activas en TransactionService y generar alertas</td>
+</tr>
+<tr>
+  <td>112</td>
+  <td>🔑 Rotación de tokens y claves de API</td>
+  <td>Reducir riesgo de exposición de credenciales</td>
+  <td>Implementar caducidad y regeneración automática de tokens JWT y API keys</td>
+</tr>
+<tr>
+  <td>113</td>
+  <td>📊 Análisis de riesgo en tiempo real</td>
+  <td>Evaluar transacciones y usuarios antes de aprobar operaciones críticas</td>
+  <td>Agregar lógica de scoring de riesgo en TransactionService usando historial</td>
+</tr>
+<tr>
+  <td>114</td>
+  <td>🛡 Protección contra spoofing</td>
+  <td>Evitar suplantación de identidad en accesos y transacciones</td>
+  <td>Verificar IP, deviceId y comportamiento anómalo antes de aprobar transacciones</td>
+</tr>
+<tr>
+  <td>115</td>
+  <td>📱 Autenticación basada en dispositivo</td>
+  <td>Asociar dispositivos confiables a cada usuario</td>
+  <td>Registrar deviceId en TransactionService y requerir verificación en nuevos dispositivos</td>
+</tr>
+<tr>
+  <td>116</td>
+  <td>💻 Monitoreo de cambios de configuración crítica</td>
+  <td>Detectar modificaciones no autorizadas de la aplicación o DB</td>
+  <td>Registrar logs y alertar al admin sobre cambios en configuración y balances</td>
+</tr>
+<tr>
+  <td>117</td>
+  <td>📝 Pruebas periódicas de integridad de DB</td>
+  <td>Verificar que las tablas de usuarios y transacciones no estén alteradas</td>
+  <td>Scripts de verificación que comparen hash de registros y balances calculados</td>
+</tr>
+<tr>
+  <td>118</td>
+  <td>🔔 Alertas de comportamiento anómalo</td>
+  <td>Notificar administradores sobre transacciones fuera del patrón habitual</td>
+  <td>Integrar alertas vía email/SMS desde TransactionService</td>
+</tr>
+<tr>
+  <td>119</td>
+  <td>🧩 Análisis de relaciones entre cuentas</td>
+  <td>Detectar fraudes que involucren múltiples usuarios</td>
+  <td>Analizar historial de transacciones y relaciones de usuarios en batch</td>
+</tr>
+<tr>
+  <td>120</td>
+  <td>⚠ Prevención de manipulación de logs</td>
+  <td>Asegurar que los registros de transacciones y errores no sean alterados</td>
+  <td>Usar tablas append-only o servicios externos de auditoría</td>
+</tr>
+
+
+
+
+    
+    </tbody>
+  </table>
+</div>
+</body>
+</html>
